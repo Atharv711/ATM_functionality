@@ -1,0 +1,54 @@
+import java.io.BufferedReader;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+
+public class CSVtoXLSXAdapter {
+
+    public static void convertCSVtoXLSX(String csvFilePath, String xlsxFilePath) {
+        try (FileOutputStream fos = new FileOutputStream(xlsxFilePath)) {
+            StringBuilder xlsxContent = new StringBuilder();
+            String line;
+            try (BufferedReader br = new BufferedReader(new FileReader(csvFilePath))) {
+                while ((line = br.readLine()) != null) {
+                    String[] data = line.split(",");
+                    for (String value : data) {
+                        xlsxContent.append(value).append("\t");
+                    }
+                    xlsxContent.append("\n");
+                }
+            }
+
+            // Generate XLSX content
+            String xlsxContentStr = generateXLSXContent(xlsxContent.toString());
+
+            // Write XLSX content to file
+            fos.write(xlsxContentStr.getBytes());
+
+            System.out.println("CSV file '" + csvFilePath + "' has been converted to XLSX file '" + xlsxFilePath + "'.");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private static String generateXLSXContent(String csvContent) {
+        return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n" +
+                "<Workbook xmlns=\"urn:schemas-microsoft-com:office:spreadsheet\"\n" +
+                " xmlns:x=\"urn:schemas-microsoft-com:office:excel\"\n" +
+                " xmlns:ss=\"urn:schemas-microsoft-com:office:spreadsheet\"\n" +
+                " xmlns:html=\"http://www.w3.org/TR/REC-html40\">\n" +
+                " <Worksheet ss:Name=\"Sheet1\">\n" +
+                "  <Table>\n" +
+                csvContent +
+                "  </Table>\n" +
+                " </Worksheet>\n" +
+                "</Workbook>";
+    }
+
+    // Example usage
+    public static void main(String[] args) {
+        String csvFilePath = "input.csv";
+        String xlsxFilePath = "output.xlsx";
+        convertCSVtoXLSX(csvFilePath, xlsxFilePath);
+    }
+}
